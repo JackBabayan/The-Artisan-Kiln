@@ -1,121 +1,50 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
+import { useEffect, useMemo, useState } from 'react'
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [phase, setPhase] = useState<'loading' | 'message'>('loading')
+  const [typedLength, setTypedLength] = useState(0)
+
+  const message = useMemo(
+    () =>
+      'Добрый день команда Jobs Tile Expert.\nЯ не выполнил тестовое задание по нескольким причинам.\nВо-первых, задание оказалось слишком объемным для выполнения в рамках моего текущего графика и доступного времени.\nВо-вторых, я не вижу большого смысла тратить значительные ресурсы на полноценную реализацию без предварительного общения с HR или технической командой, чтобы хотя бы понять взаимный интерес и основные ожидания сторон.\nКроме того, предоставленный дизайн в формате PNG не подходит для качественной реализации интерфейса в обозначенные сроки. Для полноценной и аккуратной разработки обычно необходимы исходники в Figma или другом рабочем формате, где доступны размеры, состояния элементов, отступы и адаптивные сценарии. Считаю, что подобные процессы должны быть более уважительными к времени кандидатов и начинаться хотя бы с короткого первичного общения.\nЕсли вам действительно интересна моя кандидатура, вы можете ознакомиться с моим сайтом-портфолио, где представлены проекты и опыт, накопленные за 8+ лет работы frontend-разработчиком. Думаю, этого более чем достаточно, чтобы оценить мой уровень и принять решение о целесообразности дальнейшего интервью.',
+    [],
+  )
+
+  useEffect(() => {
+    const t = window.setTimeout(() => setPhase('message'), 2000)
+    return () => window.clearTimeout(t)
+  }, [])
+
+  useEffect(() => {
+    if (phase !== 'message') return
+    setTimeout(() => setTypedLength(0), 0)
+
+    const cps = 280
+    const intervalMs = Math.max(15, Math.round(1000 / cps))
+
+    const id = window.setInterval(() => {
+      setTypedLength((prev) => (prev >= message.length ? prev : prev + 1))
+    }, intervalMs)
+
+    return () => window.clearInterval(id)
+  }, [phase, message.length])
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
+    <main className="screen" aria-live="polite">
+      {phase === 'loading' ? (
+        <div className="loaderWrap" role="status" aria-label="Загрузка">
+          <div className="spinner" aria-hidden="true" />
         </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
+      ) : (
+        <div className="messageWrap">
+          <p className="message">
+            <span className="typed">{message.slice(0, typedLength)}</span>
+            <span className="caret" aria-hidden="true" />
           </p>
         </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+      )}
+    </main>
   )
 }
 
